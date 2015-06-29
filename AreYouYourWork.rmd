@@ -1,0 +1,66 @@
+---
+title: "Are You Your Work Analysis"
+author: "Steve Leathers"
+date: "Monday, June 29, 2015"
+output: html_document
+---
+
+Grab the data with read.csv, using the pipe character as a separator.
+
+```{r}
+ayyw = read.csv("ayyw.csv", sep="|")
+```
+
+Add the ggplot2 and tm libraries.
+
+```{r}
+library(ggplot2)
+library(tm)
+```
+
+How did people answer the question "Are you your work?"
+
+```{r, echo=FALSE}
+qplot(answer, data=ayyw)
+```
+
+Create a dataframe to anaylze text, toss it all in one big chunk.
+```{r}
+ans = paste(ayyw$explanation, collapse = " ")
+```
+
+Create a vector source of all of the responses.
+```{r}
+vs = VectorSource(ans)
+```
+
+Turn that vector source into a corpus.
+```{r}
+corpus = Corpus(vs)
+```
+
+Make all text lower case, remove all punctuation, whitespace and stop words ("I", "me", "my", etc).
+```{r}
+corpus <- tm_map(corpus, content_transformer(tolower))
+corpus = tm_map(corpus, removePunctuation)
+corpus = tm_map(corpus, stripWhitespace)
+corpus = tm_map(corpus, removeWords, stopwords("english"))
+```
+
+Turn the corpus into a Document Term Matrix
+```{r}
+dtm = DocumentTermMatrix(corpus)
+dtm2 = as.matrix(dtm)
+```
+
+Turn the frequency counts into a sorted dataframe.
+```{r}
+frequency = colSums(dtm2)
+frequency = sort(frequency,decreasing=TRUE)
+words = names(frequency)
+words
+
+
+head(frequency)
+```
+
